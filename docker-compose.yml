@@ -24,8 +24,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - "/Users/ty/mongo/data:/data"
-      - "/Users/ty/mongo/config:/root/.minio"
+      - "/Users/ty/mongo/mongo_data:/data/db"
 
   redis:
     image: redis:latest
