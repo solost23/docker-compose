@@ -39,4 +39,18 @@ services:
     ports:
       - "8500:8500"
 
+  jenkins:
+    image: jenkins/jenkins:latest
+    restart: always
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "5000:5000"
+    volumes:
+      - "/Users/ty/jenkins/data:/var/jenkins_home"
+      - "/Users/ty/jenkins/run:/var/run"
+      - "/bin/docker:/bin/docker"
+    user: root
+
+
 
