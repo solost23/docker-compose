@@ -11,7 +11,7 @@ services:
       MYSQL_ROOT_PASSWORD: "123"
       TZ: "Asia/Shanghai"
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - "/Users/ty/mariadb/data:/var/lib/mysql"
       - "/Users/ty/mariadb/log:/var/log/mysql"
