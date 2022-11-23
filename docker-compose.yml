@@ -1,0 +1,43 @@
+version: "3.5"
+
+services:
+  mariadb:
+    image: mariadb:10.5.5
+    container_name: mariadb
+    restart: always
+    environment:
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: "123"
+      MYSQL_ROOT_PASSWORD: "123"
+      TZ: "Asia/Shanghai"
+    ports:
+      - "3307:3306"
+    volumes:
+      - "/Users/ty/mariadb/data:/var/lib/mysql"
+      - "/Users/ty/mariadb/log:/var/log/mysql"
+      - "/Users/ty/mariadb/conf:/etc/mysql"
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - "/Users/ty/mongo/data:/data"
+      - "/Users/ty/mongo/config:/root/.minio"
+
+  redis:
+    image: redis:latest
+    restart: always
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  consul:
+    image: consul:latest
+    container_name: consul
+    ports:
+      - "8500:8500"
+
+
