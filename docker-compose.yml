@@ -13,9 +13,9 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - "/Users/ty/mariadb/data:/var/lib/mysql"
-      - "/Users/ty/mariadb/log:/var/log/mysql"
-      - "/Users/ty/mariadb/conf:/etc/mysql"
+      - "./mariadb/data:/var/lib/mysql"
+      - "./mariadb/log:/var/log/mysql"
+      - "./mariadb/conf:/etc/mysql"
 
   mongo:
     image: mongo:latest
@@ -24,7 +24,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - "/Users/ty/mongo/mongo_data:/data/db"
+      - "./mongo/mongo_data:/data/db"
 
   redis:
     image: redis:latest
@@ -38,19 +38,122 @@ services:
     container_name: consul
     ports:
       - "8500:8500"
-
-  jenkins:
-    image: jenkins/jenkins:latest
-    restart: always
-    container_name: jenkins
-    ports:
-      - "8080:8080"
-      - "5000:5000"
     volumes:
-      - "/Users/ty/jenkins/data:/var/jenkins_home"
-      - "/Users/ty/jenkins/run:/var/run"
-      - "/bin/docker:/bin/docker"
-    user: root
+      - "./consul:/consul"
 
+  # jenkins:
+  #   image: jenkins/jenkins:latest
+  #   restart: always
+  #   container_name: jenkins
+  #   ports:
+  #     - "8080:8080"
+  #     - "5000:5000"
+  #   volumes:
+  #     - "/Users/ty/jenkins/data:/var/jenkins_home"
+  #     - "/Users/ty/jenkins/run:/var/run"
+  #     - "/bin/docker:/bin/docker"
+  #   user: root
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    restart: always
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - app_net
 
+  broker-1:
+    image: wurstmeister/kafka:latest
+    restart: always
+    container_name: broker-1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_CFG_NUM_PARTITIONS: 3
+    networks:
+      - app_net
 
+  # broker-2:
+  #   image: wurstmeister/kafka:latest
+  #   restart: always
+  #   container_name: broker-2
+  #   ports:
+  #     - "9093:9093"
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 2
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093
+  #     KAFKA_CFG_NUM_PARTITIONS: 3
+  #   networks:
+  #     - app_net
+
+  # broker-3:
+  #   image: wurstmeister/kafka:latest
+  #   restart: always
+  #   container_name: broker-3
+  #   ports:
+  #     - "9094:9094"
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 3
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9094
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9094
+  #     KAFKA_CFG_NUM_PARTITIONS: 3
+  #   networks:
+  #     - app_net
+
+  # broker-manager:
+  #   image: sheepkiller/kafka-manager:latest
+  #   restart: always
+  #   container_name: broker-manager
+  #   ports:
+  #     - "9000:9000"
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     ZK_HOSTS: zookeeper:2181
+  #     KAFKA_BROKERS: broker-1:9092,broker-2:9093,broker-3:9094
+  #   networks:
+  #     - app_net
+
+  elasticsearch:
+    image: elasticsearch:7.13.3
+    container_name: elasticsearch
+    privileged: true
+    environment: 
+      - "cluster.name=elasticsearch"
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1096m"
+      - "bootstrap.memory_lock=true"
+    volumes:
+      - "./es/plugins:/usr/share/elasticsearch/plugins"
+      - "./es/data:/usr/share/elasticsearch/data:rw"
+      - "./es/logs:/user/share/elasticsearch/logs:rw"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+  kibana:
+    image: kibana:7.13.3
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200 #设置访问elasticsearch的地址
+      I18N_LOCALE: zh-CN
+    ports:
+      - "5601:5601"
+
+networks:
+  app_net:
+    driver: bridge
