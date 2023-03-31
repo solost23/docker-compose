@@ -154,6 +154,58 @@ services:
     ports:
       - "5601:5601"
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/config:/etc/prometheus
+      - ./prometheus/data/prometheus_db:/prometheus 
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - app_net
+
+  # # 可视化面板
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - "./grafana/data:/var/lib/grafana"
+  #   depends_on:
+  #     - prometheus
+  #   networks:
+  #     - app_net
+
+  # # 采用被动推送方式获取数据并推送给prometheus
+  # pushgateway:
+  #   image: prom/pushgateway
+  #   container_name: pushgateway
+  #   restart: always
+  #   ports:
+  #     - "9091:9091"
+  #   volumes:
+  #     - ./prometheus/data/pushgateway_data:/var/lib/pushgateway
+
+  # # 告警系统
+  # alertmanager:
+  #   image: prom/alertmanager
+  #   hostname: alertmanager
+  #   container_name: alertmanager
+  #   restart: always
+  #   ports:
+  #     - "9093:9093"
+  #   volumes:
+  #     - ./prometheus/data/alertmanager_data:/var/lib/alertmanager
+
 networks:
   app_net:
     driver: bridge
