@@ -34,12 +34,20 @@ services:
       - "6379:6379"
 
   consul:
-    image: consul:latest
+    image: consul:1.13.3
     container_name: consul
+    restart: always
+    environment:
+      TZ: "Asia/Shanghai"
     ports:
       - "8500:8500"
     volumes:
-      - "$PWD/consul:/consul"
+      - "$PWD/consul/conf:/consul/conf"
+      - "$PWD/consul/data:/consul/data"
+    entrypoint: consul agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0 -data-dir=/consul/data
+    networks:
+      - app_net
+  
 
   # jenkins:
   #   image: jenkins/jenkins:latest
@@ -219,6 +227,18 @@ services:
       - "$PWD/nginx/conf/html:/usr/share/nginx/html"
     networks:
       - app_net
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres 
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - "$PWD/postgreSQL/data:/var/lib/postgresql/data"
 
 networks:
   app_net:
