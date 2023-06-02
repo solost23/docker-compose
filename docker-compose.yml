@@ -77,79 +77,80 @@ services:
   #     - "$PWD/jenkins/run:/var/run"
   #     - "/bin/docker:/bin/docker"
   #   user: root
-#  zookeeper:
-#    image: wurstmeister/zookeeper:latest
-#    restart: always
-#    container_name: zookeeper
-#    ports:
-#      - "2181:2181"
-#    networks:
-#      - app_net
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    restart: always
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - app_net
 
-#  broker-1:
-#    image: wurstmeister/kafka:latest
-#    restart: always
-#    container_name: broker-1
-#    ports:
-#      - "9092:9092"
-#    depends_on:
-#      - zookeeper
-#    environment:
-#      KAFKA_BROKER_ID: 1
-#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-#      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-#      KAFKA_CFG_NUM_PARTITIONS: 3
-#    networks:
-#      - app_net
+  broker-1:
+    image: wurstmeister/kafka:latest
+    restart: always
+    container_name: broker-1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # 注册到zookeeper互通kafka节点地址, 此处填本机地址
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.11:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_CFG_NUM_PARTITIONS: 3
+    networks:
+      - app_net
 
-  # broker-2:
-  #   image: wurstmeister/kafka:latest
-  #   restart: always
-  #   container_name: broker-2
-  #   ports:
-  #     - "9093:9093"
-  #   depends_on:
-  #     - zookeeper
-  #   environment:
-  #     KAFKA_BROKER_ID: 2
-  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093
-  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093
-  #     KAFKA_CFG_NUM_PARTITIONS: 3
-  #   networks:
-  #     - app_net
+  broker-2:
+     image: wurstmeister/kafka:latest
+     restart: always
+     container_name: broker-2
+     ports:
+       - "9093:9093"
+     depends_on:
+       - zookeeper
+     environment:
+       KAFKA_BROKER_ID: 2
+       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.11:9093
+       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093
+       KAFKA_CFG_NUM_PARTITIONS: 3
+     networks:
+       - app_net
 
-  # broker-3:
-  #   image: wurstmeister/kafka:latest
-  #   restart: always
-  #   container_name: broker-3
-  #   ports:
-  #     - "9094:9094"
-  #   depends_on:
-  #     - zookeeper
-  #   environment:
-  #     KAFKA_BROKER_ID: 3
-  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9094
-  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9094
-  #     KAFKA_CFG_NUM_PARTITIONS: 3
-  #   networks:
-  #     - app_net
+  broker-3:
+     image: wurstmeister/kafka:latest
+     restart: always
+     container_name: broker-3
+     ports:
+       - "9094:9094"
+     depends_on:
+       - zookeeper
+     environment:
+       KAFKA_BROKER_ID: 3
+       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.11:9094
+       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9094
+       KAFKA_CFG_NUM_PARTITIONS: 3
+     networks:
+       - app_net
 
-  # broker-manager:
-  #   image: sheepkiller/kafka-manager:latest
-  #   restart: always
-  #   container_name: broker-manager
-  #   ports:
-  #     - "9000:9000"
-  #   depends_on:
-  #     - zookeeper
-  #   environment:
-  #     ZK_HOSTS: zookeeper:2181
-  #     KAFKA_BROKERS: broker-1:9092,broker-2:9093,broker-3:9094
-  #   networks:
-  #     - app_net
+#  broker-manager:
+#     image: sheepkiller/kafka-manager:latest
+#     restart: always
+#     container_name: broker-manager
+#     ports:
+#       - "9000:9000"
+#     depends_on:
+#       - zookeeper
+#     environment:
+#       ZK_HOSTS: zookeeper:2181
+#       KAFKA_BROKERS: broker-1:9092,broker-2:9093,broker-3:9094
+#     networks:
+#       - app_net
 
 #  elasticsearch:
 #    image: elasticsearch:7.13.3
