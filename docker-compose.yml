@@ -17,14 +17,14 @@ services:
       - "$PWD/mariadb/log:/var/log/mysql"
       - "$PWD/mariadb/conf:/etc/mysql"
 
-  mongo:
-    image: mongo:latest
-    restart: always
-    container_name: mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - "$PWD/mongo/mongo_data:/data/db"
+#  mongo:
+#    image: mongo:latest
+#    restart: always
+#    container_name: mongo
+#    ports:
+#      - "27017:27017"
+#    volumes:
+#      - "$PWD/mongo/mongo_data:/data/db"
 
   redis:
     image: redis:latest
@@ -48,20 +48,20 @@ services:
     networks:
       - app_net
 
-  etcd:
-    image: docker.io/bitnami/etcd:3.5
-    container_name: etcd
-    restart: always
-    environment:
-      - ALLOW_NONE_AUTHENTICATION=yes
-      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
-    ports:
-      - "23790:2379"
-      - "23800:2380"
-    volumes:
-      - "$PWD/data/etcd:/bitnami/etcd"
-    networks:
-      - app_net
+#  etcd:
+#    image: docker.io/bitnami/etcd:3.5
+#    container_name: etcd
+#    restart: always
+#    environment:
+#      - ALLOW_NONE_AUTHENTICATION=yes
+#      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+#    ports:
+#      - "23790:2379"
+#      - "23800:2380"
+#    volumes:
+#      - "$PWD/data/etcd:/bitnami/etcd"
+#    networks:
+#      - app_net
 
   
 
@@ -77,66 +77,66 @@ services:
   #     - "$PWD/jenkins/run:/var/run"
   #     - "/bin/docker:/bin/docker"
   #   user: root
-  zookeeper:
-    image: wurstmeister/zookeeper:latest
-    restart: always
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-    networks:
-      - app_net
+#  zookeeper:
+#    image: wurstmeister/zookeeper:latest
+#    restart: always
+#    container_name: zookeeper
+#    ports:
+#      - "2181:2181"
+#    networks:
+#      - app_net
 
-  broker-1:
-    image: wurstmeister/kafka:latest
-    restart: always
-    container_name: broker-1
-    ports:
-      - "9092:9092"
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      # 注册到zookeeper互通kafka节点地址, 此处填本机地址
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.11:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_CFG_NUM_PARTITIONS: 3
-    networks:
-      - app_net
+#  broker-1:
+#    image: wurstmeister/kafka:latest
+#    restart: always
+#    container_name: broker-1
+#    ports:
+#      - "9092:9092"
+#    depends_on:
+#      - zookeeper
+#    environment:
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#      # 注册到zookeeper互通kafka节点地址, 此处填本机地址
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.11:9092
+#      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+#      KAFKA_CFG_NUM_PARTITIONS: 3
+#    networks:
+#      - app_net
 
-  broker-2:
-     image: wurstmeister/kafka:latest
-     restart: always
-     container_name: broker-2
-     ports:
-       - "9093:9093"
-     depends_on:
-       - zookeeper
-     environment:
-       KAFKA_BROKER_ID: 2
-       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.11:9093
-       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093
-       KAFKA_CFG_NUM_PARTITIONS: 3
-     networks:
-       - app_net
+#  broker-2:
+#     image: wurstmeister/kafka:latest
+#     restart: always
+#     container_name: broker-2
+#     ports:
+#       - "9093:9093"
+#     depends_on:
+#       - zookeeper
+#     environment:
+#       KAFKA_BROKER_ID: 2
+#       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.11:9093
+#       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093
+#       KAFKA_CFG_NUM_PARTITIONS: 3
+#     networks:
+#       - app_net
 
-  broker-3:
-     image: wurstmeister/kafka:latest
-     restart: always
-     container_name: broker-3
-     ports:
-       - "9094:9094"
-     depends_on:
-       - zookeeper
-     environment:
-       KAFKA_BROKER_ID: 3
-       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.11:9094
-       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9094
-       KAFKA_CFG_NUM_PARTITIONS: 3
-     networks:
-       - app_net
+#  broker-3:
+#     image: wurstmeister/kafka:latest
+#     restart: always
+#     container_name: broker-3
+#     ports:
+#       - "9094:9094"
+#     depends_on:
+#       - zookeeper
+#     environment:
+#       KAFKA_BROKER_ID: 3
+#       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.11:9094
+#       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9094
+#       KAFKA_CFG_NUM_PARTITIONS: 3
+#     networks:
+#       - app_net
 
 #  broker-manager:
 #     image: sheepkiller/kafka-manager:latest
@@ -240,14 +240,16 @@ services:
 #    volumes:
 #      - "/etc/localtime:/etc/localtime:ro"
 #      - "$PWD/nginx/conf/log:/var/log/nginx"
-#      - "$PWD/nginx/conf/nginx.conf:/etc/nginx/nginx.conf"
 #      - "$PWD/nginx/conf/html:/usr/share/nginx/html"
+#      - "$PWD/nginx/conf/nginx.conf:/etc/nginx/nginx.conf:rw"
+##      - "$PWD/nginx/conf/conf/workflow.conf:/etc/nginx/conf/workflow.conf:rw"
+#      - "$PWD/nginx/conf/conf.d:/etc/nginx/conf.d"
 #    networks:
 #      - app_net
 
-  postgres:
-    image: postgres:latest
-    container_name: postgres 
+  postgresql:
+    image: postgres:13.11-bullseye
+    container_name: postgresql
     restart: always
     environment:
       POSTGRES_USER: root
@@ -255,7 +257,25 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - "$PWD/postgreSQL/data:/var/lib/postgresql/data"
+      - "$PWD/postgresql/data:/var/lib/postgresql/data"
+
+#  minio:
+#    image: minio/minio:latest
+#    container_name: minio
+#    restart: always
+#    command: server --console-address ":9001" http://minio/data{1...2}
+#    environment:
+#      MINIO_ROOT_USER: "minioadmin"
+#      MINIO_ROOT_PASSWORD: "minioadmin"
+#    ports:
+#      - "9000:9000"
+#      - "9001:9001"
+#    volumes:
+#      - "/Users/ty/minio/data1:/data1"
+#      - "/Users/ty/minio/data2:/data2"
+#      - "/etc/localtime:/etc/localtime"
+#    networks:
+#      - app_net
 
 networks:
   app_net:
