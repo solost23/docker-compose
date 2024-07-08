@@ -213,7 +213,7 @@ services:
       MONGODB_URI: "mongodb://mongo:27017"
       MONGO_EXPORTER_AUTO_DISCOVER: true
     ports:
-      - "9216:9001"
+      - "9216:9216"
     depends_on:
       - mongo
     networks:
