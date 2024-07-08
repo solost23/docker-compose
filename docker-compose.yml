@@ -16,14 +16,15 @@ services:
 #      - "${PWD}/mariadb/log:/var/log/mysql"
 #      - "${PWD}/mariadb/conf:/etc/mysql"
 
-#  mongo:
-#    image: mongo:latest
-#    restart: always
-#    container_name: mongo
-#    ports:
-#      - "27017:27017"
-#    volumes:
-#      - "$PWD/mongo/mongo_data:/data/db"
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - "${PWD}/data/mongo:/data/db"
+    networks:
+      - app_net
 
   redis:
     image: redis:latest
@@ -32,20 +33,20 @@ services:
     ports:
       - "6379:6379"
 
-  consul:
-    image: consul:1.13.3
-    container_name: consul
-    restart: always
-    environment:
-      TZ: "Asia/Shanghai"
-    ports:
-      - "8500:8500"
-    volumes:
-      - "$PWD/consul/conf:/consul/conf"
-      - "$PWD/consul/data:/consul/data"
-    entrypoint: consul agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0 -data-dir=/consul/data
-    networks:
-      - app_net
+#  consul:
+#    image: consul:1.13.3
+#    container_name: consul
+#    restart: always
+#    environment:
+#      TZ: "Asia/Shanghai"
+#    ports:
+#      - "8500:8500"
+#    volumes:
+#      - "$PWD/consul/conf:/consul/conf"
+#      - "$PWD/consul/data:/consul/data"
+#    entrypoint: consul agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0 -data-dir=/consul/data
+#    networks:
+#      - app_net
 
 #  etcd:
 #    image: docker.io/bitnami/etcd:3.5
@@ -178,36 +179,60 @@ services:
 #    ports:
 #      - "5601:5601"
 
-#  prometheus:
-#    image: prom/prometheus:latest
-#    container_name: prometheus
-#    restart: always
-#    ports:
-#      - "9090:9090"
-#    volumes:
-#      - $PWD/prometheus/config:/etc/prometheus
-#      - $PWD/prometheus/data/prometheus_db:/prometheus
-#    command:
-#      - '--config.file=/etc/prometheus/prometheus.yml'
-#      - '--storage.tsdb.path=/prometheus'
-#      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-#      - '--web.console.templates=/usr/share/prometheus/consoles'
-#    networks:
-#      - app_net
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - $PWD/conf/prometheus:/etc/prometheus
+      - $PWD/data/prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - app_net
 
-  # # 可视化面板
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: grafana
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - "$PWD/grafana/data:/var/lib/grafana"
-  #   depends_on:
-  #     - prometheus
-  #   networks:
-  #     - app_net
+  # 监控本机信息
+  prometheus-exporter:
+    image: prom/node-exporter
+    container_name: prometheus-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - app_net
+
+  # 监控mongo
+  mongo_exporter:
+    image: bitnami/mongodb-exporter
+    container_name: mongo_exporter
+    environment:
+      MONGODB_URI: "mongodb://mongo:27017"
+      MONGO_EXPORTER_AUTO_DISCOVER: true
+    ports:
+      - "9216:9001"
+    depends_on:
+      - mongo
+    networks:
+      - app_net
+
+  # 可视化面板
+  grafana:
+     image: grafana/grafana:latest
+     container_name: grafana
+     restart: always
+     ports:
+       - "3000:3000"
+     volumes:
+       - "$PWD/data/grafana:/var/lib/grafana"
+       - "$PWD/conf/grafana:/etc/grafana"
+     depends_on:
+       - prometheus
+     networks:
+       - app_net
 
   # # 采用被动推送方式获取数据并推送给prometheus
   # pushgateway:
@@ -287,39 +312,39 @@ services:
 #      - "$PWD/jenkins/jenkins_home:/var/jenkins_home"
 
   # 主从复制MySQL
-  mariadb:
-    image: mariadb:10.5.5
-    container_name: mariadb-master
-    restart: always
-    environment:
-      MYSQL_USER: "root"
-      MYSQL_ROOT_PASSWORD: "123"
-      TZ: "Asia/Shanghai"
-    ports:
-      - "3306:3306"
-    volumes:
-      - "${PWD}/mariadb/data:/var/lib/mysql"
-      - "${PWD}/mariadb/log:/var/log/mysql"
-      - "${PWD}/mariadb/conf:/etc/mysql"
-    networks:
-      - app_net
+#  mariadb:
+#    image: mariadb:10.5.5
+#    container_name: mariadb-master
+#    restart: always
+#    environment:
+#      MYSQL_USER: "root"
+#      MYSQL_ROOT_PASSWORD: "123"
+#      TZ: "Asia/Shanghai"
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - "${PWD}/mariadb/data:/var/lib/mysql"
+#      - "${PWD}/mariadb/log:/var/log/mysql"
+#      - "${PWD}/mariadb/conf:/etc/mysql"
+#    networks:
+#      - app_net
 
-  mariadb-slave1:
-    image: mariadb:10.5.5
-    container_name: mariadb-slave1
-    restart: always
-    environment:
-      MYSQL_USER: "root"
-      MYSQL_ROOT_PASSWORD: "123"
-      TZ: "Asia/Shanghai"
-    ports:
-      - "3307:3306"
-    volumes:
-      - "${PWD}/mariadb-slave1/data:/var/lib/mysql"
-      - "${PWD}/mariadb-slave1/log:/var/log/mysql"
-      - "${PWD}/mariadb-slave1/conf:/etc/mysql"
-    networks:
-      - app_net
+#  mariadb-slave1:
+#    image: mariadb:10.5.5
+#    container_name: mariadb-slave1
+#    restart: always
+#    environment:
+#      MYSQL_USER: "root"
+#      MYSQL_ROOT_PASSWORD: "123"
+#      TZ: "Asia/Shanghai"
+#    ports:
+#      - "3307:3306"
+#    volumes:
+#      - "${PWD}/mariadb-slave1/data:/var/lib/mysql"
+#      - "${PWD}/mariadb-slave1/log:/var/log/mysql"
+#      - "${PWD}/mariadb-slave1/conf:/etc/mysql"
+#    networks:
+#      - app_net
 
 networks:
   app_net:
