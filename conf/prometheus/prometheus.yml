@@ -1,7 +1,7 @@
 # 全局配置  
 global:  
-  scrape_interval:     1s # 设置默认的抓取间隔为15秒  
-  evaluation_interval: 1s # 设置规则评估间隔为15秒  
+  scrape_interval:     15s # 设置默认的抓取间隔为15秒  
+  evaluation_interval: 15s # 设置规则评估间隔为15秒  
   
 # 抓取配置  
 scrape_configs:  
@@ -18,4 +18,7 @@ scrape_configs:
   - job_name: 'mongo_exporter'
     static_configs:
     - targets: ['mongo_exporter:9216']
+  - job_name: 'python_exporter'
+    static_configs:
+    - targets: ['host.docker.internal:8080']
 
