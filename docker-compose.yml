@@ -196,6 +196,17 @@ services:
     networks:
       - app_net
 
+#  prometheus的平替 性能超高
+#  victoria-metrics:
+#    image: victoriametrics/victoria-metrics:latest
+#    container_name: victoria-metrics
+#    ports:
+#      - "8428:8428"
+#    volumes:
+#      - "$PWD/data/victoria-metrics:/victoria-metrics-data"
+#    networks:
+#      - app_net
+
   # 监控本机信息
   prometheus-exporter:
     image: prom/node-exporter
